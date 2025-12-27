@@ -1,0 +1,9 @@
+User types
+   ↓
+query updates immediately
+   ↓
+debounce effect waits
+   ↓
+debouncedQuery updates AFTER pause
+
+

@@ -1,0 +1,3 @@
+DVA CLEANUPA U USEFFECTS
+ahaaaa, znaci app2 ima dva ....useEffecta, i svaki ima svoj cleanup , prvi cleanup timer, drugi cleanup fetch via abort controller aaahaaaa...
+

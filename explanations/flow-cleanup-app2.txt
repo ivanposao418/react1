@@ -1,0 +1,63 @@
+
+
+## 🧭 FLOW CHART (this is the money part)
+
+Read top → bottom.
+
+```
+USER TYPES
+   |
+   v
+query state updates
+   |
+   v
+DEBOUNCE EFFECT
+(wait X ms)
+   |
+   v
+debouncedQuery updates
+   |
+   v
+FETCH EFFECT RUNS
+   |
+   +--> setLoading(true)
+   |
+   +--> start fetch (async)
+   |
+   +--> register cleanup (abort)
+   |
+   v
+FETCH COMPLETES OR ABORTS
+   |
+   +--> success → setUsers()
+   |
+   +--> error (not abort) → setError()
+   |
+   +--> finally → setLoading(false)
+```
+
+---
+
+## 🔄 WHERE CLEANUP FITS (zoomed in)
+
+```
+debouncedQuery changes AGAIN
+   |
+   v
+React says:
+   "Before running new effect,
+    run OLD cleanup"
+   |
+   v
+controller.abort()
+   |
+   v
+old fetch dies
+   |
+   v
+new fetch starts
+```
+
+Cleanup is **not immediate**, it’s **reactive**.
+
+---
