@@ -28,7 +28,6 @@
 // and we render a list of filtered results based on the debounced query
 // the results are displayed as a list of items that match the debouncedQuery
 
-
 import { useEffect, useState } from "react";
 
 const ITEMS = [

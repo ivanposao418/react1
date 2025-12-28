@@ -3,12 +3,11 @@
 // import { useState } from "react";
 // 1. import (useState })
 // 2. from 'react'
-import { useState, useEffect } from "react";
+import { useState } from 'react';
 
 // 1 const [query, setQuery] 
 // 2 = useState("");
 const [query, setQuery] = useState("");
-
 
 // 1. <input
 // 2. placeholder="..search"
