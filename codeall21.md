@@ -8,15 +8,21 @@ src
 ├── App1.tsx
 ├── App1withDBHook.tsx
 ├── App2.tsx
-├── App2withDBHook.tsx
 ├── App2withSearchHook.tsx
 ├── App3 forms.tsx
 ├── App3forms-with-patterns.tsx
+├── BugTypes
+│   ├── Bug type1-StaleClosure fixed .tsx
+│   ├── Bug type1-StaleClosure.tsx
+│   ├── Bug type2-Snake 8 fixed.tsx
+│   ├── Bug type2-Snake 8.tsx
+│   └── Bug type3 Identity Crisis.tsx
+├── README.md
 ├── anki
 │   └── ideje1.txt
 ├── assets
 │   └── react.svg
-├── codeall.md
+├── codeall21.md
 ├── explanations
 │   ├── app2.md
 │   ├── explanations-app2.md
@@ -32,8 +38,9 @@ src
 ├── main.tsx
 ├── patterns-app1.md
 ├── proceduralBank
-│   ├── input-usestate.tsx
-│   └── useeffect.tsx
+│   ├── App1.tsx
+│   ├── App3.tsx
+│   └── vježbe.txt
 └── tehnike
     └── chunkng.md
 
@@ -119,7 +126,6 @@ src
 // we also display the raw query and debounced query below the input box
 // and we render a list of filtered results based on the debounced query
 // the results are displayed as a list of items that match the debouncedQuery
-
 
 import { useEffect, useState } from "react";
 
@@ -332,93 +338,6 @@ function App() {
 
     return () => clearTimeout(timer);
   }, [query]);
-
-  // fetch on debouncedQuery update
-  useEffect(() => {
-    if (!debouncedQuery) {
-      setUsers([]);
-      return;
-    }
-
-    // start loading
-    setLoading(true);
-    setError("");
-
-    const controller = new AbortController();
-
-    fetch(`https://api.github.com/search/users?q=${debouncedQuery}`, {
-      signal: controller.signal,
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.items) {
-          setUsers(data.items.slice(0, 10)); // display top 10
-        }
-      })
-      .catch(err => {
-        if (err.name !== "AbortError") {
-          setError("Failed to fetch");
-        }
-      })
-      .finally(() => setLoading(false));
-
-    return () => controller.abort();
-  }, [debouncedQuery]);
-
-  return (
-    <div style={{ padding: 40 }}>
-      <h1>GitHub User Search</h1>
-
-      <input
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="search github username..."
-        style={{ padding: 8, fontSize: 18 }}
-      />
-
-      {loading && <p>Loading…</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <ul>
-        {users.map(u => (
-          <li key={u.id}>
-            <img
-              src={u.avatar_url}
-              alt=""
-              width={32}
-              height={32}
-              style={{ borderRadius: "50%", marginRight: 8 }}
-            />
-            {u.login}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-
-```
-
-`App2withDBHook.tsx`:
-
-```tsx
-// Feinman with some AI v1.2
-
-import React, { useState, useEffect } from "react";
-import { useDebouncedValue } from "./hooks/useDebouncedValue";
-
-function App() {
-  const [query, setQuery] = useState("");
-  //const [debouncedQuery, setDebouncedQuery] = useState("");
-  
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // debounce input change
-  const debouncedQuery = useDebouncedValue(query, 500);
 
   // fetch on debouncedQuery update
   useEffect(() => {
@@ -852,10 +771,120 @@ export default function App3() {
 
 ```
 
+`BugTypes/Bug type1-StaleClosure fixed .tsx`:
+
+```tsx
+import React from "react";
+
+export default function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      console.log("interval sees:", count);
+      // setCount(count + 1);
+      setCount(prev => prev + 1)
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div>
+      <h1>{count}</h1>
+    </div>
+  );
+}
+
+```
+
+`BugTypes/Bug type1-StaleClosure.tsx`:
+
+```tsx
+import React from "react";
+
+export default function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      console.log("interval sees:", count);
+      setCount(count + 1);
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div>
+      <h1>{count}</h1>
+    </div>
+  );
+}
+
+```
+
+`BugTypes/Bug type2-Snake 8 fixed.tsx`:
+
+```tsx
+import React from "react";
+
+export default function FixedSnake() {
+  const [count, setCount] = React.useState(0);
+
+  // ✅ CAUSE: user action changes state
+  const increment = () => {
+    setCount(prev => prev + 1);
+  };
+
+  // ✅ EFFECT: reacts to state change, does NOT change it
+  React.useEffect(() => {
+    console.log("count changed to:", count);
+  }, [count]);
+
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={increment}>+</button>
+    </div>
+  );
+}
+
+```
+
+`BugTypes/Bug type2-Snake 8.tsx`:
+
+```tsx
+import React from "react";
+
+export default function Snake() {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    console.log("effect runs, count =", count);
+    setCount(count + 1);
+  }, [count]);
+
+  return <h1>{count}</h1>;
+}
+
+```
+
+`README.md`:
+
+```md
+# PracticeReact
+# react1
+# react1
+# react1
+
+```
+
 `anki/ideje1.txt`:
 
 ```txt
-1. what is immutable updates in react
+1. what is immutable updates in react 
+
 ```
 
 `assets/react.svg`:
@@ -1231,7 +1260,7 @@ runs if that useEffect is triggered more then once
 
 ```
 
-`proceduralBank/input-usestate.tsx`:
+`proceduralBank/App1.tsx`:
 
 ```tsx
 //Ok so we divide blocks into parts that are easier to remember.
@@ -1239,12 +1268,11 @@ runs if that useEffect is triggered more then once
 // import { useState } from "react";
 // 1. import (useState })
 // 2. from 'react'
-import { useState, useEffect } from "react";
+import { useState } from 'react';
 
 // 1 const [query, setQuery] 
 // 2 = useState("");
 const [query, setQuery] = useState("");
-
 
 // 1. <input
 // 2. placeholder="..search"
@@ -1255,6 +1283,162 @@ const [query, setQuery] = useState("");
 
 <input placeholder="..search" value={query} onChange={(e) => setQuery(e.target.value)} />
 
+```
+
+`proceduralBank/App3.tsx`:
+
+```tsx
+// like an object but with semicolon separation of members ...
+
+type User = {
+  id: number;
+  login: string;
+  html_url: string;
+};
+
+type FormState = {
+  query: string;
+  minLength: number;
+  autoSearch: boolean;
+};
+
+
+type FormState = {
+
+}
+
+// query: string;
+// autoSearch: boolean;
+
+
+  const [form, setForm] = useState<FormState>({
+    query: "",
+    minLength: 3,
+    autoSearch: true,
+  });
+
+
+const [form, setForm] = useState<FormState>({
+    query: "",
+    minLength: 3, 
+autoSearch: true,
+})
+
+
+  const isValid = form.query.length >= form.minLength;
+
+
+//half 
+
+const isValid = 
+form.query.length 
+
+>= form.minLength
+
+
+
+const isValid = form.query.length >= form.minLength
+
+
+  // fetch on debouncedQuery update
+  useEffect(() => {
+    if (!debouncedQuery) {
+      setUsers([]);
+      return;
+    }
+
+    // start loading
+    setLoading(true);
+    setError("");
+
+
+
+setLoading(true);
+setError("");
+
+
+if (!debouncedQuery) {
+    setUsers([]);
+    return;
+}
+
+if (!debouncedQuery) {
+    setLoading(true);
+    setError(null);
+
+}
+
+
+
+
+// abort initiate
+    const controller = new AbortController();
+
+const controller = 
+new AbortController();
+
+const controller = new AbortController();
+
+
+// fetch async 3 chain
+
+fetch(``)
+fetch(``,{})
+
+fetch(``, {
+    signal: controller.signal,
+})
+
+fetch(`https://api.github.com/search/users?q=${debouncedQuery}`)
+
+fetch(`https://api.github.com/search/users?q=${debouncedQuery}`, {
+    signal: controller.signal,
+})
+.then()
+.then()
+.catch()
+.finally()
+
+.then(res => res.json())
+.then(data => {
+    if(data.items) {
+        setUsers(data.items.slice(0,10));
+    }
+})
+.catch(err => {
+    if (err.name !== "AbortError") {
+        setError("failed to fetch.."))
+    }
+})
+    fetch(`https://api.github.com/search/users?q=${debouncedQuery}`, {
+      signal: controller.signal,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.items) {
+          setUsers(data.items.slice(0, 10)); // display top 10
+        }
+      })
+      .catch(err => {
+        if (err.name !== "AbortError") {
+          setError("Failed to fetch");
+        }
+      })
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
+```
+
+`proceduralBank/vježbe.txt`:
+
+```txt
+PREPISI
+
+
+PREPISI NA SLJEPO 
+
+1. line dio
+2. half line dio logički
 ```
 
 `tehnike/chunkng.md`:
